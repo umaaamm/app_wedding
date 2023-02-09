@@ -7,13 +7,14 @@ import 'package:circular_reveal_animation/circular_reveal_animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -329,9 +330,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             color: HexColor('#FFFFFF'),
           ),
           onPressed: () {
-            // Get.to(scan());
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => scan()));
+            Get.to(scan());
             _fabAnimationController.reset();
             _borderRadiusAnimationController.reset();
             _borderRadiusAnimationController.forward();
