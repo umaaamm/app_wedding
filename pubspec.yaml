@@ -41,6 +41,8 @@ dependencies:
   auto_size_text: ^3.0.0
   appbar_animated: ^0.0.3
   google_fonts: ^0.3.8
+  qr_code_scanner: ^1.0.1
+  # get: ^4.6.5
 
 dev_dependencies:
   flutter_test:

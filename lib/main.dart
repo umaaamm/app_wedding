@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:app_wedding/scan.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:circular_reveal_animation/circular_reveal_animation.dart';
 import 'package:flutter/material.dart';
@@ -244,12 +245,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               begin: Alignment.bottomRight,
                               end: Alignment.topLeft,
                             ),
-                              borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8),
                             image: DecorationImage(
-                              image: NetworkImage("https://raw.githubusercontent.com/umaaamm/image-icon-dance/fc653e21f8bb005fb77955bf3ab7e705b5316847/dance.png"),
-                              fit: BoxFit.fitHeight,
-                              alignment: FractionalOffset.centerRight,
-                            opacity: 0.1),
+                                image: NetworkImage(
+                                    "https://raw.githubusercontent.com/umaaamm/image-icon-dance/fc653e21f8bb005fb77955bf3ab7e705b5316847/dance.png"),
+                                fit: BoxFit.fitHeight,
+                                alignment: FractionalOffset.centerRight,
+                                opacity: 0.1),
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(12),
@@ -265,7 +267,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                       "Yoga Tomi Nyoto",
                                       style: TextStyle(
                                           color: Colors.black,
-                                          fontFamily: 'Rubik-Bold', fontSize: 18),
+                                          fontFamily: 'Rubik-Bold',
+                                          fontSize: 18),
                                     ),
                                     Text("Hadir",
                                         style: TextStyle(
@@ -290,13 +293,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                     ),
                                     style: ButtonStyle(
                                         // foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                                        backgroundColor: MaterialStateProperty.all<Color>(HexColor("#00883E")),
+                                        backgroundColor:
+                                            MaterialStateProperty.all<Color>(
+                                                HexColor("#00883E")),
                                         shape: MaterialStateProperty.all<
                                                 RoundedRectangleBorder>(
                                             RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(18.0),
-                                                )))),
+                                          borderRadius:
+                                              BorderRadius.circular(18.0),
+                                        )))),
                               ],
                             ),
                           ),
@@ -306,7 +311,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-
                       );
                       // );
                     },
@@ -325,6 +329,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             color: HexColor('#FFFFFF'),
           ),
           onPressed: () {
+            // Get.to(scan());
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => scan()));
             _fabAnimationController.reset();
             _borderRadiusAnimationController.reset();
             _borderRadiusAnimationController.forward();
