@@ -1,11 +1,16 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:app_wedding/Services/Services.dart';
 import 'package:app_wedding/main.dart';
+import 'package:app_wedding/model/countModel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+
+import 'model/undanganModel.dart';
 
 class scan extends StatelessWidget {
   const scan({Key? key}) : super(key: key);
@@ -28,6 +33,11 @@ class QRViewExample extends StatefulWidget {
 class _QRViewExampleState extends State<QRViewExample> {
   Barcode? result;
   QRViewController? controller;
+  Future<undanganModel>? _undangan;
+  Future<countModel>? _count;
+
+  final Services _services = Services();
+
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 
   @override
@@ -42,24 +52,31 @@ class _QRViewExampleState extends State<QRViewExample> {
   @override
   Widget build(BuildContext context) {
     if (result != null) {
-      Future.delayed(Duration.zero, (){
+      _services.updateKeterangan(result!.code.toString());
+      setState(() {
+      _undangan = _services
+          .fetchUndanganList();
+      _count = _services.fetchCount();
+      });
+
+      Future.delayed(Duration.zero, () {
         Get.back(result: result!.code);
       });
     }
     return Scaffold(
-      body: Stack(
-        children: [
-          Column(
-            children: <Widget>[
-              AppBar(
-                backgroundColor:HexColor("#40BD63"),
-                title: Text("Scan QR Code"),),
-              Expanded(flex: 4, child: _buildQrView(context)),
-            ],
-          ),
-        ],
-      )
-    );
+        body: Stack(
+      children: [
+        Column(
+          children: <Widget>[
+            AppBar(
+              backgroundColor: HexColor("#40BD63"),
+              title: Text("Scan QR Code"),
+            ),
+            Expanded(flex: 4, child: _buildQrView(context)),
+          ],
+        ),
+      ],
+    ));
   }
 
   Widget _buildQrView(BuildContext context) {
@@ -71,7 +88,7 @@ class _QRViewExampleState extends State<QRViewExample> {
       key: qrKey,
       onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
-          borderColor:  HexColor("#40BD63"),
+          borderColor: HexColor("#40BD63"),
           borderRadius: 10,
           borderLength: 30,
           borderWidth: 10,
@@ -107,5 +124,3 @@ class _QRViewExampleState extends State<QRViewExample> {
     super.dispose();
   }
 }
-
-

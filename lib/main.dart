@@ -1,6 +1,10 @@
 import 'dart:async';
 
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:app_wedding/Services/Services.dart';
+import 'package:app_wedding/model/countModel.dart';
+import 'package:app_wedding/model/responseEdit.dart';
+import 'package:app_wedding/model/undanganModel.dart';
 import 'package:app_wedding/scan.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:circular_reveal_animation/circular_reveal_animation.dart';
@@ -8,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 void main() => runApp(MyApp());
 
@@ -23,6 +29,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Animated Navigation Bottom Bar'),
+      builder: EasyLoading.init(),
     );
   }
 }
@@ -39,6 +46,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   final autoSizeGroup = AutoSizeGroup();
   var _bottomNavIndex = 0; //default index of a first screen
+  // late Future<undanganModel> ;
+  final Services _services = Services();
+  Future<undanganModel>? _undangan;
+  Future<countModel>? _count;
 
   late AnimationController _fabAnimationController;
   late AnimationController _borderRadiusAnimationController;
@@ -54,8 +65,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   ];
 
   @override
+  void reassemble() {
+    super.reassemble();
+    _services.fetchUndanganList();
+    _services.fetchCount();
+  }
+
+  @override
   void initState() {
     super.initState();
+    _services.fetchUndanganList();
+    _services.fetchCount();
     final systemTheme = SystemUiOverlayStyle.light.copyWith(
       systemNavigationBarColor: HexColor('#FFFFFF'),
       systemNavigationBarIconBrightness: Brightness.light,
@@ -118,19 +138,23 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return false;
   }
 
+  Future<void> _pullRefresh() async {
+    setState(() {
+      _undangan = _services.fetchUndanganList();
+      _count = _services.fetchCount();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData.dark(),
       child: Scaffold(
         extendBody: true,
-        // appBar: RoundAppBar(title: 'My Wedding'),
         backgroundColor: Colors.white,
-        // body: NotificationListener<ScrollNotification>(
-        //   onNotification: onScrollNotification,
-        //   child: NavigationScreen(iconList[_bottomNavIndex]),
-        // ),
-        body: Stack(
+        body: RefreshIndicator(
+            onRefresh: _pullRefresh,
+          child: Stack(
           children: <Widget>[
             Container(
               height: 200,
@@ -143,81 +167,115 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               child: Card(
                 child: Container(
                   height: 85,
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: new EdgeInsets.all(10.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Total Hadir",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Rubik-Semi'),
+                  child: FutureBuilder<countModel>(
+                      future: _services.fetchCount(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Row(
+                            children: [
+                              Container(
+                                padding: new EdgeInsets.all(10.0),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Total Hadir",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Rubik-Semi'),
+                                    ),
+                                    Text(
+                                      snapshot.data?.data?.keteranganCount
+                                              .toString() ??
+                                          "",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Rubik-Semi',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 24),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Spacer(),
+                              Container(
+                                padding: new EdgeInsets.all(10.0),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Belum Hadir",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Rubik-Semi'),
+                                    ),
+                                    Text(
+                                      snapshot.data?.data?.isMarchendiseCount
+                                              .toString() ??
+                                          "",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Rubik-Semi',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 24),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Spacer(),
+                              Container(
+                                padding: new EdgeInsets.all(10.0),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Total Undangan",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Rubik-Semi'),
+                                    ),
+                                    Text(
+                                      snapshot.data?.data?.totalCount
+                                              .toString() ??
+                                          "",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Rubik-Semi',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 24),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text('${snapshot.error}');
+                        }
+                        return Padding(
+                          padding: EdgeInsets.only(top: 23),
+                          child: Container(
+                            child: Center(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  SizedBox(
+                                    child: CircularProgressIndicator(),
+                                    height: 30.0,
+                                    width: 30.0,
+                                  ),
+                                ],
+                              ),
                             ),
-                            Text(
-                              "100",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Rubik-Semi',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24),
-                            )
-                          ],
-                        ),
-                      ),
-                      Spacer(),
-                      Container(
-                        padding: new EdgeInsets.all(10.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Belum Hadir",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Rubik-Semi'),
-                            ),
-                            Text(
-                              "40",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Rubik-Semi',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24),
-                            )
-                          ],
-                        ),
-                      ),
-                      Spacer(),
-                      Container(
-                        padding: new EdgeInsets.all(10.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Total Undangan",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Rubik-Semi'),
-                            ),
-                            Text(
-                              "200",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Rubik-Semi',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                          ),
+                        );
+                      }),
                 ),
                 // height: 300,
                 color: Colors.white,
@@ -231,97 +289,170 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               padding: const EdgeInsets.only(top: 250),
               child: Container(
                 child: SizedBox.expand(
-                  child: ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    itemCount: 5,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        child: Container(
-                          height: 100,
-                          // color: Colors.white,
-                          decoration: BoxDecoration(
-                            // gradient: LinearGradient( colors: [Color(0xff3fbc63), Color(0xffffffff)], begin: Alignment.bottomRight, end: Alignment.topLeft),
-                            gradient: LinearGradient(
-                              colors: [Color(0x733fbc63), Color(0xffffffff)],
-                              begin: Alignment.bottomRight,
-                              end: Alignment.topLeft,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                            image: DecorationImage(
-                                image: NetworkImage(
-                                    "https://raw.githubusercontent.com/umaaamm/image-icon-dance/fc653e21f8bb005fb77955bf3ab7e705b5316847/dance.png"),
-                                fit: BoxFit.fitHeight,
-                                alignment: FractionalOffset.centerRight,
-                                opacity: 0.1),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Yoga Tomi Nyoto",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: 'Rubik-Bold',
-                                          fontSize: 18),
+                  child: FutureBuilder<undanganModel>(
+                      future: _services.fetchUndanganList(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            itemCount: snapshot.data?.data?.length,
+                            itemBuilder: (ctx, index) {
+                              return Card(
+                                child: Container(
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0x733fbc63),
+                                        Color(0xffffffff)
+                                      ],
+                                      begin: Alignment.bottomRight,
+                                      end: Alignment.topLeft,
                                     ),
-                                    Text("Hadir",
-                                        style: TextStyle(
-                                            color: HexColor("#00883E"),
-                                            fontFamily: 'Rubik-Semi',
-                                            fontWeight: FontWeight.bold)),
-                                    Text("10-11-2023 - 13.00 WIB",
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                            color: Colors.grey,
-                                            fontFamily: 'Rubik-Semi',
-                                            fontWeight: FontWeight.bold))
-                                  ],
+                                    borderRadius: BorderRadius.circular(8),
+                                    image: DecorationImage(
+                                        image: NetworkImage(
+                                            "https://raw.githubusercontent.com/umaaamm/image-icon-dance/fc653e21f8bb005fb77955bf3ab7e705b5316847/dance.png"),
+                                        fit: BoxFit.fitHeight,
+                                        alignment: FractionalOffset.centerRight,
+                                        opacity: 0.1),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(12),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              snapshot.data?.data?[index]
+                                                      .nama ??
+                                                  "",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontFamily: 'Rubik-Bold',
+                                                  fontSize: 18),
+                                            ),
+                                            Text(
+                                                snapshot.data?.data?[index]
+                                                        .keterangan ??
+                                                    "",
+                                                style: TextStyle(
+                                                    color: HexColor("#00883E"),
+                                                    fontFamily: 'Rubik-Semi',
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            Text(
+                                                parseTimeStamp(int.parse(
+                                                        snapshot
+                                                                .data
+                                                                ?.data?[index]
+                                                                .tanggal ??
+                                                            ""))
+                                                    .toString(),
+                                                textAlign: TextAlign.start,
+                                                style: TextStyle(
+                                                    color: Colors.grey,
+                                                    fontFamily: 'Rubik-Semi',
+                                                    fontWeight:
+                                                        FontWeight.bold))
+                                          ],
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              _services
+                                                  .updateMerchandise(snapshot
+                                                          .data
+                                                          ?.data?[index]
+                                                          .sId ??
+                                                      "")
+                                                  .then((value) => {
+                                                        if (value.message ==
+                                                            'ok')
+                                                          {
+                                                            setState(() {
+                                                              _undangan = _services
+                                                                  .fetchUndanganList();
+                                                            }),
+                                                          }
+                                                      });
+
+                                              // print("data", data.message.toString())
+                                            },
+                                            child: snapshot.data?.data?[index]
+                                                        .isMerchendise ==
+                                                    '1'
+                                                ? Text(
+                                                    "Got the Marchendise",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  )
+                                                : Text(
+                                                    "Get Marchendise",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                            style: ButtonStyle(
+                                                // foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                                                backgroundColor:
+                                                    MaterialStateProperty.all<
+                                                            Color>(
+                                                        HexColor("#00883E")),
+                                                shape: MaterialStateProperty.all<
+                                                        RoundedRectangleBorder>(
+                                                    RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          18.0),
+                                                )))),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      print("mwkwm");
-                                    },
-                                    child: Text(
-                                      "Get Marchendise",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    style: ButtonStyle(
-                                        // foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                                        backgroundColor:
-                                            MaterialStateProperty.all<Color>(
-                                                HexColor("#00883E")),
-                                        shape: MaterialStateProperty.all<
-                                                RoundedRectangleBorder>(
-                                            RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(18.0),
-                                        )))),
-                              ],
+                                elevation: 3,
+                                color: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              );
+                              // );
+                            },
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text('${snapshot.error}');
+                        }
+
+                        // By default, show a loading spinner.
+                        return Padding(
+                          padding: EdgeInsets.only(top: 200),
+                          child: Container(
+                            child: Center(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  SizedBox(
+                                    child: CircularProgressIndicator(),
+                                    height: 50.0,
+                                    width: 50.0,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        elevation: 3,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      );
-                      // );
-                    },
-                  ),
+                        );
+                      }),
                 ),
                 margin: EdgeInsets.fromLTRB(16, 0, 16, 16),
                 color: Colors.white,
               ),
             )
           ],
+        ),
         ),
         floatingActionButton: FloatingActionButton(
           backgroundColor: HexColor('#40BD63'),
@@ -370,9 +501,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
-  // _buildBody() {
-  //   return
-  // }
+  String parseTimeStamp(int value) {
+    DateTime date1 = DateTime.fromMillisecondsSinceEpoch(value);
+    // var date = DateTime.fromMillisecondsSinceEpoch(value * 1000);
+    var d12 = DateFormat('dd-MM-yyyy, hh:mm a').format(date1);
+    return d12;
+  }
 }
 
 class NavigationScreen extends StatefulWidget {
