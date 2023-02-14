@@ -13,7 +13,7 @@ class Services {
     if (response.statusCode == 200) {
       return undanganModel.fromJson(json.decode(response.body));
     } else {
-      throw Exception('Failed to load album');
+      throw Exception('Failed to load Undangan');
     }
   }
 
@@ -24,7 +24,7 @@ class Services {
     if (response.statusCode == 200) {
       return countModel.fromJson(json.decode(response.body));
     } else {
-      throw Exception('Failed to load album');
+      throw Exception('Failed to load Count');
     }
   }
 
@@ -35,7 +35,7 @@ class Services {
     if (response.statusCode == 200) {
       return responseEdit.fromJson(json.decode(response.body));
     } else {
-      throw Exception('Failed to load album');
+      throw Exception('Failed to update Merchandise');
     }
   }
 
@@ -46,7 +46,25 @@ class Services {
     if (response.statusCode == 200) {
       return responseEdit.fromJson(json.decode(response.body));
     } else {
-      throw Exception('Failed to load album');
+      throw Exception('Failed to update Keterangan');
+    }
+  }
+
+  Future<undanganModel> fetchByKeterangan(int keterangan) async {
+    String val= '';
+    if(keterangan == 0){
+      val = "Hadir";
+    }else{
+      val = "Tidak Hadir";
+    }
+
+    final response = await http
+        .get(Uri.parse('https://my-wedding-serv-bxipa5vtoa-uc.a.run.app/list-pilihan/${val}'));
+
+    if (response.statusCode == 200) {
+      return undanganModel.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to update Merchandise');
     }
   }
 }
