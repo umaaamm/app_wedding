@@ -10,8 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-
+import 'package:flutter/services.dart';
 import 'model/undanganModel.dart';
+import 'package:vibration/vibration.dart';
 
 class scan extends StatelessWidget {
 
@@ -72,6 +73,7 @@ class _QRViewExampleState extends State<QRViewExample> {
                   future: _services.updateKeterangan(result!.code.toString()),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
+                      Vibration.vibrate(duration: 300);
                       if (snapshot.data?.message == 'ok') {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           //When finish, call actions inside
